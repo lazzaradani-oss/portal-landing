@@ -225,7 +225,7 @@ export default function Page() {
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           >
             <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-semibold">
-              Danielle Lazzara
+              danielle lazzara
             </span>
 
             {/* Whisper-thin ink outline via layered ghost text */}
@@ -237,7 +237,7 @@ export default function Page() {
                 filter: "blur(0.4px)",
               }}
             >
-              Danielle Lazzara
+              danielle lazzara
             </span>
 
             {/* Grain overlay */}
@@ -255,7 +255,7 @@ export default function Page() {
           {/* Button - positioned lower for balance */}
           <motion.div className="mt-10 sm:mt-12 md:mt-16 pointer-events-auto">
             <motion.button
-              aria-label="Enter My Portfolio"
+              aria-label="enter portfolio"
               onClick={() => setShowHero(false)}
               className="relative px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 bg-black/80 border border-white/70 text-white uppercase tracking-wide text-xs sm:text-sm md:text-base rounded-[6px] focus:outline-none focus:ring-2 focus:ring-white/40"
               initial={false}
@@ -274,7 +274,7 @@ export default function Page() {
                 ] }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
               />
-              <span className="relative z-10">Enter My Portfolio</span>
+              <span className="relative z-10">enter portfolio</span>
               {/* Ink ripple on hover - subtle mask using gradient */}
               <motion.span
                 aria-hidden
