@@ -5,58 +5,143 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Corridor from "./portfolio/page";
 
 function WormholeIntro({ onComplete }: { onComplete: () => void }) {
-  // Failsafe in case animation callbacks don't fire (tab throttling, etc.)
+  // Reduced motion preference
+  const [prefersReducedMotion, setPRM] = useState(false);
   useEffect(() => {
-    const id = setTimeout(() => onComplete(), 3600);
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setPRM(mq.matches);
+    apply();
+    const h = (e: MediaQueryListEvent) => setPRM(e.matches);
+    mq.addEventListener?.("change", h);
+    return () => mq.removeEventListener?.("change", h);
+  }, []);
+
+  // Parallax tilt (mouse/touch)
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  useEffect(() => {
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      let x = 0, y = 0;
+      if (e instanceof TouchEvent && e.touches[0]) {
+        x = e.touches[0].clientX; y = e.touches[0].clientY;
+      } else if (e instanceof MouseEvent) {
+        x = e.clientX; y = e.clientY;
+      }
+      mx.set(x);
+      my.set(y);
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onMove);
+    };
+  }, [mx, my]);
+
+  const w = typeof window !== "undefined" ? window.innerWidth : 1920;
+  const h = typeof window !== "undefined" ? window.innerHeight : 1080;
+  const tiltX = useSpring(useTransform(my, [0, h], [6, -6]), { stiffness: 35, damping: 12 });
+  const tiltY = useSpring(useTransform(mx, [0, w], [-8, 8]), { stiffness: 35, damping: 12 });
+
+  // Failsafe end
+  useEffect(() => {
+    const id = setTimeout(() => onComplete(), prefersReducedMotion ? 2200 : 3400);
     return () => clearTimeout(id);
-  }, [onComplete]);
+  }, [onComplete, prefersReducedMotion]);
+
+  const spinDuration = prefersReducedMotion ? 1.4 : 2.4;
+  const fadeDelay = prefersReducedMotion ? 1.2 : 2.6;
+
+  const ringCount = 10;
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-50 bg-black overflow-hidden"
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
-      transition={{ duration: 0.8, delay: 2.6, ease: "easeInOut" }}
+      transition={{ duration: 0.8, delay: fadeDelay, ease: "easeInOut" }}
       onAnimationComplete={onComplete}
+      aria-label="Junji Ito style wormhole intro"
     >
-      {/* Swirling tunnel */}
-      <motion.div
-        className="relative rounded-full"
-        style={{ width: "180vmax", height: "180vmax", filter: "blur(2px)" }}
-        initial={{ rotate: 0, scale: 1 }}
-        animate={{ rotate: 720, scale: 0.05 }}
-        transition={{ duration: 2.4, ease: "easeInOut" }}
+      {/* 3D stage */}
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ perspective: "1400px", perspectiveOrigin: "50% 50%" }}
       >
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            backgroundImage:
-              "conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0.95), rgba(0,0,0,0.95) 12.5%, rgba(255,255,255,0.95) 25%, rgba(0,0,0,0.95) 37.5%, rgba(255,255,255,0.95) 50%, rgba(0,0,0,0.95) 62.5%, rgba(255,255,255,0.95) 75%, rgba(0,0,0,0.95) 87.5%, rgba(255,255,255,0.95) 100%)",
-            boxShadow:
-              "inset 0 0 120px rgba(0,0,0,0.8), 0 0 60px rgba(255,255,255,0.15)",
-          }}
-        />
+        <motion.div
+          className="relative"
+          style={{ transformStyle: "preserve-3d", rotateX: tiltX, rotateY: tiltY }}
+        >
+          {/* Spiral disc */}
+          <motion.div
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ width: "180vmax", height: "180vmax", overflow: "hidden" }}
+            initial={{ scale: 1, rotate: 0 }}
+            animate={{ scale: 0.06, rotate: prefersReducedMotion ? 180 : 720 }}
+            transition={{ duration: spinDuration, ease: "easeInOut" }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  "conic-gradient(from 0deg at 50% 50%, #000 0 6deg, #fff 6deg 12deg, #000 12deg 18deg, #fff 18deg 24deg, #000 24deg 30deg, #fff 30deg 36deg, #000 36deg 42deg, #fff 42deg 48deg, #000 48deg 54deg, #fff 54deg 60deg)",
+                backgroundSize: "100% 100%",
+                filter: "contrast(120%)",
+              }}
+            />
+            {/* Grain */}
+            <div
+              aria-hidden
+              className="absolute inset-0 opacity-25"
+              style={{
+                backgroundImage:
+                  "url('data:image/svg+xml,%3Csvg viewBox=\'0 0 120 120\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E')",
+                mixBlendMode: "overlay",
+              }}
+            />
+            {/* Radial mask to suggest tunnel */}
+            <div
+              aria-hidden
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(0,0,0,0) 35%, rgba(0,0,0,0.85) 70%, rgba(0,0,0,1) 100%)",
+              }}
+            />
+          </motion.div>
 
-        {/* Aperture ring to sell depth */}
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            width: "62vmin",
-            height: "62vmin",
-            background:
-              "radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(255,255,255,0.55) 46%, rgba(0,0,0,1) 62%)",
-            filter: "blur(1.5px)",
-            boxShadow: "0 0 80px rgba(255,255,255,0.08)",
-          }}
-        />
-      </motion.div>
+          {/* Depth rings */}
+          {Array.from({ length: ringCount }).map((_, i) => {
+            const z = -200 - i * 180; // farther back
+            const s = 1 + i * 0.04; // slightly larger so perspective shrinks
+            const opacity = Math.max(0.08, 0.24 - i * 0.02);
+            return (
+              <motion.div
+                key={i}
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{
+                  width: `${60 + i * 8}vmin`,
+                  height: `${60 + i * 8}vmin`,
+                  transform: `translateZ(${z}px) scale(${s})`,
+                  border: "2px solid rgba(255,255,255,0.7)",
+                  boxShadow: "0 0 40px rgba(255,255,255,0.05)",
+                  opacity,
+                }}
+                animate={{ rotate: i % 2 ? -90 : 90 }}
+                transition={{ duration: spinDuration * 1.6, ease: "easeInOut" }}
+              />
+            );
+          })}
+        </motion.div>
+      </div>
 
       {/* Vignette */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.9) 100%)",
+            "radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.9) 100%)",
         }}
       />
 
