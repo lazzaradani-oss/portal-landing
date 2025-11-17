@@ -130,6 +130,19 @@ function WallEye({ position, yPosition, zPosition, onClick, label, isPortal }: W
       onHoverEnd={() => setHovered(false)}
       whileHover={{ scale: scale * 1.08 }}
     >
+      {/* Liquid ink-like warp aura on hover */}
+      <motion.div
+        aria-hidden
+        className="absolute -inset-6 rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(255,255,255,0.08), rgba(255,255,255,0) 60%)",
+          mixBlendMode: "overlay",
+          filter: "blur(2px)",
+        }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1.04 : 0.95 }}
+        transition={{ duration: 0.25 }}
+      />
       <motion.div
         className="relative w-24 h-16 bg-white rounded-full border-3 border-gray-800 overflow-hidden"
         style={{
