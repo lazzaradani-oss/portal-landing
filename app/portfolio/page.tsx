@@ -3,6 +3,7 @@
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 // Noise overlay for surreal Junji Ito atmosphere
 function NoiseOverlay() {
@@ -66,11 +67,14 @@ interface WallEyeProps {
   position: "left" | "right";
   yPosition: number;
   zPosition: number;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
+  label?: string;
+  isPortal?: boolean;
 }
 
-function WallEye({ position, yPosition, zPosition, onClick }: WallEyeProps) {
+function WallEye({ position, yPosition, zPosition, onClick, label, isPortal }: WallEyeProps) {
   const [isBlinking, setIsBlinking] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const eyeRef = useRef<HTMLDivElement>(null);
   const [pupilPos, setPupilPos] = useState({ x: 0, y: 0 });
 
@@ -122,15 +126,20 @@ function WallEye({ position, yPosition, zPosition, onClick }: WallEyeProps) {
         opacity: opacity,
       }}
       onClick={onClick}
-      whileHover={{ scale: scale * 1.1 }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      whileHover={{ scale: scale * 1.08 }}
     >
       <motion.div
         className="relative w-24 h-16 bg-white rounded-full border-3 border-gray-800 overflow-hidden"
         style={{
-          boxShadow: "0 0 25px rgba(255,255,255,0.6), inset 0 2px 8px rgba(0,0,0,0.3)",
+          boxShadow: hovered
+            ? "0 0 35px rgba(255,255,255,0.75), inset 0 2px 10px rgba(0,0,0,0.4)"
+            : "0 0 25px rgba(255,255,255,0.6), inset 0 2px 8px rgba(0,0,0,0.3)",
         }}
         animate={{
           scaleY: isBlinking ? 0.1 : 1,
+          filter: hovered ? "contrast(110%) brightness(105%)" : "none",
         }}
         transition={{ duration: 0.1 }}
       >
@@ -144,14 +153,19 @@ function WallEye({ position, yPosition, zPosition, onClick }: WallEyeProps) {
           animate={{
             x: pupilPos.x,
             y: pupilPos.y,
+            scale: hovered ? 1.08 : 1,
           }}
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
         >
           {/* Pupil */}
-          <div className="absolute left-1/2 top-1/2 w-5 h-5 bg-black rounded-full -translate-x-1/2 -translate-y-1/2"
+          <motion.div className="absolute left-1/2 top-1/2 bg-black rounded-full -translate-x-1/2 -translate-y-1/2"
             style={{
+              width: hovered ? "22px" : "20px",
+              height: hovered ? "22px" : "20px",
               boxShadow: "0 0 8px rgba(0,0,0,0.8)",
             }}
+            animate={{ scale: hovered ? 1.05 : 1 }}
+            transition={{ duration: 0.2 }}
           />
           
           {/* Highlight */}
@@ -191,12 +205,25 @@ function WallEye({ position, yPosition, zPosition, onClick }: WallEyeProps) {
             />
           ))}
         </div>
+
+        {/* Portal label */}
+        {isPortal && label && (
+          <motion.div
+            className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] text-white/90 scratchy-text"
+            initial={{ opacity: 0, y: 2 }}
+            animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 2 }}
+            transition={{ duration: 0.2 }}
+          >
+            {label}
+          </motion.div>
+        )}
       </motion.div>
     </motion.div>
   );
 }
 
 export default function HallOfObservation() {
+  const router = useRouter();
   const [scroll, setScroll] = useState(0);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -204,6 +231,7 @@ export default function HallOfObservation() {
   const [rippleScale, setRippleScale] = useState(0);
   const [rippleFreq, setRippleFreq] = useState(0.006);
   const [rippleEnabled, setRippleEnabled] = useState(true);
+  const [transitioning, setTransitioning] = useState<{active: boolean; x: number; y: number; route: string | null}>({active:false, x:0, y:0, route:null});
 
   // Set window size on mount
   useEffect(() => {
@@ -272,8 +300,50 @@ export default function HallOfObservation() {
   const leftEyes = generateEyePositions("left");
   const rightEyes = generateEyePositions("right");
 
+  // Portal eyes definitions
+  const portalEyes = [
+    { side: "left" as const, y: 30, z: 500, route: "/about", label: "About Me" },
+    { side: "right" as const, y: 50, z: 900, route: "/projects", label: "Projects" },
+    { side: "left" as const, y: 70, z: 1300, route: "/inspirations", label: "Inspirations" },
+    { side: "right" as const, y: 40, z: 1700, route: "/upcoming", label: "Upcoming" },
+  ];
+
+  const onPortalClick = (e: React.MouseEvent, route: string) => {
+    const x = e.clientX;
+    const y = e.clientY;
+    setTransitioning({ active: true, x, y, route });
+  };
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-black">
+      {/* Ink-burst transition overlay */}
+      {transitioning.active && (
+        <motion.div
+          className="fixed inset-0 z-[60] pointer-events-none"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div
+            className="absolute rounded-full"
+            style={{
+              left: transitioning.x - 1,
+              top: transitioning.y - 1,
+              width: 2,
+              height: 2,
+              background: "radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 30%, rgba(0,0,0,1) 100%)",
+              boxShadow: "0 0 60px rgba(255,255,255,0.35)",
+            }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1600 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            onAnimationComplete={() => {
+              if (transitioning.route) router.push(transitioning.route);
+              setTimeout(() => setTransitioning({ active: false, x: 0, y: 0, route: null }), 50);
+            }}
+          />
+        </motion.div>
+      )}
+
       {/* Noise overlay */}
       <NoiseOverlay />
       {/* Fog/Atmosphere */}
@@ -352,6 +422,19 @@ export default function HallOfObservation() {
                 zPosition={eye.z}
               />
             ))}
+
+            {/* Portal eyes on the left */}
+            {portalEyes.filter(p => p.side === "left").map((p, i) => (
+              <WallEye
+                key={`pl-${i}-${p.y}-${p.z}`}
+                position="left"
+                yPosition={p.y}
+                zPosition={p.z}
+                isPortal
+                label={p.label}
+                onClick={(e) => onPortalClick(e as any, p.route)}
+              />
+            ))}
           </div>
 
           {/* Right Wall with Eyes */}
@@ -370,6 +453,19 @@ export default function HallOfObservation() {
                 position="right"
                 yPosition={eye.y}
                 zPosition={eye.z}
+              />
+            ))}
+
+            {/* Portal eyes on the right */}
+            {portalEyes.filter(p => p.side === "right").map((p, i) => (
+              <WallEye
+                key={`pr-${i}-${p.y}-${p.z}`}
+                position="right"
+                yPosition={p.y}
+                zPosition={p.z}
+                isPortal
+                label={p.label}
+                onClick={(e) => onPortalClick(e as any, p.route)}
               />
             ))}
           </div>
@@ -445,6 +541,18 @@ export default function HallOfObservation() {
               }}
             />
           </motion.div>
+
+          {/* Dynamic fog intensifying with scroll */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,1) 100%)",
+            }}
+            animate={{ opacity: 0.2 + Math.min(scroll / 100, 0.6) }}
+          />
+
+          {/* Floating prism shards */}
+          <PrismShards scroll={scroll} />
         </motion.div>
       </div>
 
@@ -468,6 +576,59 @@ export default function HallOfObservation() {
         </button>
       </div>
     </main>
+  );
+}
+
+// Floating prism shards component
+function PrismShards({ scroll }: { scroll: number }) {
+  const items = [
+    { x: "20%", y: "30%", z: -800, size: 40, delay: 0 },
+    { x: "75%", y: "20%", z: -1200, size: 28, delay: 1.2 },
+    { x: "60%", y: "65%", z: -1500, size: 34, delay: 0.6 },
+  ];
+  return (
+    <>
+      {items.map((it, idx) => (
+        <motion.div
+          key={idx}
+          className="absolute"
+          style={{
+            left: it.x,
+            top: it.y,
+            transform: `translateZ(${it.z - scroll * 10}px)`,
+          }}
+        >
+          <motion.div
+            className="relative"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 10 + idx * 2, repeat: Infinity, ease: "easeInOut", delay: it.delay }}
+          >
+            <div
+              className="opacity-80"
+              style={{
+                width: `${it.size}px`,
+                height: `${it.size * 1.4}px`,
+                clipPath: "polygon(50% 0%, 80% 30%, 60% 100%, 40% 100%, 20% 30%)",
+                background: "linear-gradient(180deg, #eee, #111)",
+                boxShadow: "0 0 20px rgba(255,255,255,0.15)",
+                filter: "contrast(120%)",
+              }}
+            />
+            {/* Minimal chromatic flicker */}
+            <motion.div
+              className="absolute inset-0 mix-blend-screen"
+              animate={{ opacity: [0.05, 0.12, 0.05] }}
+              transition={{ duration: 6 + idx, repeat: Infinity, ease: "easeInOut", delay: it.delay / 2 }}
+              style={{
+                background: "linear-gradient(180deg, rgba(173,216,230,0.15), rgba(255,182,193,0.12))",
+                clipPath: "polygon(50% 0%, 80% 30%, 60% 100%, 40% 100%, 20% 30%)",
+                filter: "blur(0.5px)",
+              }}
+            />
+          </motion.div>
+        </motion.div>
+      ))}
+    </>
   );
 }
 

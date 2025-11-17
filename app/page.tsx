@@ -264,8 +264,8 @@ export default function Page() {
             />
           </motion.h1>
 
-          {/* Button - positioned lower for balance */}
-          <motion.div className="mt-10 sm:mt-12 md:mt-16 pointer-events-auto">
+          {/* Button - positioned lower for cinematic composition */}
+          <motion.div className="mt-12 sm:mt-16 md:mt-20 lg:mt-24 pointer-events-auto">
             <motion.button
               aria-label="Enter My Portfolio"
               onClick={handleEnterPortfolio}
