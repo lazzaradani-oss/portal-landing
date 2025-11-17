@@ -1,11 +1,13 @@
-/* Refer to .copilot-style.md aesthetic */
+/* Junji Ito Horror-Manga Aesthetic */
 @import "tailwindcss";
 
 :root {
-  --background: #000010;
+  --background: #000000;
   --foreground: #ffffff;
+  --ink-black: #0a0a0a;
+  --paper-white: #fafafa;
+  --blood-accent: #1a0000;
 }
-
 
 * {
   margin: 0;
@@ -14,14 +16,78 @@
 }
 
 body {
-  background: linear-gradient(180deg, #000010 0%, #020018 100%);
+  background: #000000;
   color: var(--foreground);
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Georgia', 'Times New Roman', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  cursor: default;
+}
+
+/* Hand-drawn manga texture */
+@keyframes grainShift {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2%, -2%); }
+  20% { transform: translate(2%, 1%); }
+  30% { transform: translate(-1%, 2%); }
+  40% { transform: translate(1%, -1%); }
+  50% { transform: translate(-2%, 1%); }
+  60% { transform: translate(2%, -2%); }
+  70% { transform: translate(-1%, -1%); }
+  80% { transform: translate(1%, 2%); }
+  90% { transform: translate(-2%, -1%); }
+}
+
+.manga-grain {
+  position: relative;
+}
+
+.manga-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  animation: grainShift 8s infinite;
+}
+
+/* Ink bleed effect */
+@keyframes inkBleed {
+  0%, 100% { filter: blur(0px) contrast(100%); }
+  50% { filter: blur(0.3px) contrast(105%); }
+}
+
+.ink-bleed {
+  animation: inkBleed 6s ease-in-out infinite;
+}
+
+/* Breathing/unsettling wobble */
+@keyframes breathe {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.008) rotate(0.15deg); }
+}
+
+.breathe {
+  animation: breathe 8s ease-in-out infinite;
+}
+
+/* Sharp contrast borders */
+.manga-border {
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.9), inset 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Thin scratchy lines */
+.scratchy-text {
+  text-shadow: 
+    0.5px 0.5px 0 rgba(0, 0, 0, 0.8),
+    -0.5px -0.5px 0 rgba(255, 255, 255, 0.1);
+  -webkit-text-stroke: 0.3px rgba(255, 255, 255, 0.15);
 }
 
 /* Optimize performance on mobile */
@@ -37,6 +103,12 @@ body {
   .blur-3xl {
     filter: blur(16px) !important;
   }
+  
+  /* Reduce animation complexity on mobile */
+  @keyframes grainShift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-1%, 1%); }
+  }
 }
 
 /* Reduce motion for accessibility */
@@ -48,5 +120,13 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  
+  .manga-grain::after {
+    animation: none !important;
+  }
+  
+  .ink-bleed,
+  .breathe {
+    animation: none !important;
+  }
 }
-

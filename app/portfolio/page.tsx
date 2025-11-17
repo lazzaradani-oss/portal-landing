@@ -4,28 +4,61 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 
-// Noise overlay for surreal atmosphere
+// Noise overlay for surreal Junji Ito atmosphere
 function NoiseOverlay() {
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-50 opacity-[0.12]"
+      className="fixed inset-0 pointer-events-none z-50 opacity-[0.18]"
       style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
         mixBlendMode: "overlay",
       }}
     />
   );
 }
 
-// Fog/Atmospheric depth effect
+// Fog/Atmospheric depth effect with vignette
 function FogOverlay() {
   return (
     <div
       className="fixed inset-0 pointer-events-none z-30"
       style={{
-        background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.95) 100%)",
+        background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.98) 100%)",
       }}
     />
+  );
+}
+
+// Subtle ink splatter accent (appears randomly)
+function InkSplatter() {
+  return (
+    <motion.div
+      className="fixed pointer-events-none z-40"
+      style={{
+        top: "10%",
+        right: "8%",
+        width: "120px",
+        height: "120px",
+        opacity: 0.08,
+        filter: "blur(1.5px)",
+      }}
+      animate={{
+        opacity: [0.05, 0.12, 0.05],
+        scale: [1, 1.05, 1],
+      }}
+      transition={{
+        duration: 12,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      <svg viewBox="0 0 100 100" fill="white">
+        <path d="M50,10 Q30,30 40,50 Q25,60 35,75 Q45,85 55,75 Q70,60 60,50 Q70,30 50,10z" />
+        <circle cx="30" cy="30" r="4" opacity="0.6" />
+        <circle cx="65" cy="45" r="3" opacity="0.5" />
+        <circle cx="45" cy="70" r="2.5" opacity="0.7" />
+      </svg>
+    </motion.div>
   );
 }
 // Eye component for walls - simplified and clean
@@ -250,13 +283,13 @@ export default function HallOfObservation() {
       <div
         className="fixed inset-0"
         style={{
-          perspective: `${perspective}px`,
+            perspective: `${perspective}px`,
           perspectiveOrigin: "center center",
         }}
       >
         {/* Hallway with parallax */}
         <motion.div
-          className="absolute inset-0"
+            className="absolute inset-0 manga-grain ink-bleed"
           style={{
             transformStyle: "preserve-3d",
             transform: `translateZ(${-scroll * 15}px)`,
@@ -288,7 +321,7 @@ export default function HallOfObservation() {
 
             {/* Checkerboard Floor with liquid ripple */}
             <motion.div
-              className="absolute bottom-0 w-full h-[70%]"
+            className="absolute bottom-0 w-full h-[70%] manga-grain"
               style={{
                 transform: "rotateX(80deg)",
                 transformOrigin: "center bottom",
@@ -303,7 +336,7 @@ export default function HallOfObservation() {
 
           {/* Left Wall with Eyes */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-[220px] bg-gradient-to-r from-black via-gray-900 to-transparent"
+          className="absolute left-0 top-0 bottom-0 w-[220px] bg-gradient-to-r from-black via-gray-900 to-transparent manga-border breathe"
             style={{
               transform: "rotateY(18deg)",
               transformOrigin: "left center",
@@ -323,7 +356,7 @@ export default function HallOfObservation() {
 
           {/* Right Wall with Eyes */}
           <div
-            className="absolute right-0 top-0 bottom-0 w-[220px] bg-gradient-to-l from-black via-gray-900 to-transparent"
+          className="absolute right-0 top-0 bottom-0 w-[220px] bg-gradient-to-l from-black via-gray-900 to-transparent manga-border breathe"
             style={{
               transform: "rotateY(-18deg)",
               transformOrigin: "right center",
@@ -343,7 +376,7 @@ export default function HallOfObservation() {
 
           {/* Subtle ceiling plane to reinforce corridor */}
           <div
-            className="absolute left-0 right-0 top-0 h-[22%]"
+            className="absolute left-0 right-0 top-0 h-[22%] manga-grain"
             style={{
               transform: "rotateX(-78deg)",
               transformOrigin: "center top",
@@ -355,7 +388,7 @@ export default function HallOfObservation() {
 
           {/* Female Silhouette at the end */}
           <motion.div
-            className="absolute left-1/2 bottom-[15%]"
+            className="absolute left-1/2 bottom-[15%] breathe"
             style={{
               transform: `translate3d(-50%, 0, -2800px) scale(${1.2 + scroll * 0.015})`,
             }}
@@ -418,8 +451,8 @@ export default function HallOfObservation() {
       {/* Instructions */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 text-center font-mono">
         <div className="inline-flex flex-col items-center gap-1 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
-          <p className="text-white text-sm drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">Scroll to walk deeper • Move mouse to look around</p>
-          <p className="text-white/70 text-[11px]">Hall of Observation</p>
+          <p className="text-white text-sm drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] scratchy-text">Scroll to walk deeper • Move mouse to look around</p>
+          <p className="text-white/70 text-[11px] scratchy-text">Hall of Observation</p>
         </div>
       </div>
 
