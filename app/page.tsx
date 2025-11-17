@@ -163,8 +163,9 @@ function WormholeIntro({ onComplete }: { onComplete: () => void }) {
 }
 
 export default function Page() {
-  const [showIntro, setShowIntro] = useState(true);
   const [showHero, setShowHero] = useState(true);
+  const [showWormhole, setShowWormhole] = useState(false);
+  const [showCorridor, setShowCorridor] = useState(false);
 
   // Subtle parallax for hero elements
   const mouseX = useMotionValue(0);
@@ -180,17 +181,28 @@ export default function Page() {
   const px = useSpring(useTransform(mouseX, [0, typeof window !== "undefined" ? window.innerWidth : 1920], [-6, 6]), { stiffness: 40, damping: 15 });
   const py = useSpring(useTransform(mouseY, [0, typeof window !== "undefined" ? window.innerHeight : 1080], [-4, 4]), { stiffness: 40, damping: 15 });
 
+  const handleEnterPortfolio = () => {
+    setShowHero(false);
+    setShowWormhole(true);
+  };
+
+  const handleWormholeComplete = () => {
+    setShowWormhole(false);
+    setShowCorridor(true);
+  };
+
   return (
     <>
-      {/* Render corridor underneath so it’s ready when the intro fades */}
-      <Corridor />
+      {/* Render corridor when ready */}
+      {showCorridor && <Corridor />}
 
-      {showIntro && <WormholeIntro onComplete={() => setShowIntro(false)} />}
+      {/* Wormhole plays after clicking Enter */}
+      {showWormhole && <WormholeIntro onComplete={handleWormholeComplete} />}
 
-      {/* Junji Ito–inspired hero overlay */}
-      {!showIntro && showHero && (
+      {/* Junji Ito–inspired hero overlay - shows first */}
+      {showHero && (
         <motion.div
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center text-center pointer-events-none"
+          className="fixed inset-0 z-40 bg-black flex flex-col items-center justify-center text-center pointer-events-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -225,7 +237,7 @@ export default function Page() {
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           >
             <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-semibold">
-              danielle lazzara
+              Danielle Lazzara
             </span>
 
             {/* Whisper-thin ink outline via layered ghost text */}
@@ -237,7 +249,7 @@ export default function Page() {
                 filter: "blur(0.4px)",
               }}
             >
-              danielle lazzara
+              Danielle Lazzara
             </span>
 
             {/* Grain overlay */}
@@ -255,8 +267,8 @@ export default function Page() {
           {/* Button - positioned lower for balance */}
           <motion.div className="mt-10 sm:mt-12 md:mt-16 pointer-events-auto">
             <motion.button
-              aria-label="enter portfolio"
-              onClick={() => setShowHero(false)}
+              aria-label="Enter My Portfolio"
+              onClick={handleEnterPortfolio}
               className="relative px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 bg-black/80 border border-white/70 text-white uppercase tracking-wide text-xs sm:text-sm md:text-base rounded-[6px] focus:outline-none focus:ring-2 focus:ring-white/40"
               initial={false}
               whileHover={{ skewX: [-1, 1, 0], scale: 1.02 }}
@@ -274,7 +286,7 @@ export default function Page() {
                 ] }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
               />
-              <span className="relative z-10">enter portfolio</span>
+              <span className="relative z-10">Enter My Portfolio</span>
               {/* Ink ripple on hover - subtle mask using gradient */}
               <motion.span
                 aria-hidden
