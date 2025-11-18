@@ -240,18 +240,6 @@ export default function Page() {
               Danielle Lazzara
             </span>
 
-            {/* Whisper-thin ink outline via layered ghost text */}
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 text-transparent"
-              style={{
-                WebkitTextStroke: "1px rgba(255,255,255,0.35)",
-                filter: "blur(0.4px)",
-              }}
-            >
-              Danielle Lazzara
-            </span>
-
             {/* Grain overlay */}
             <span
               aria-hidden
