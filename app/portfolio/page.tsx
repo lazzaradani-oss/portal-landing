@@ -2,7 +2,7 @@
 "use client";
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // Noise overlay for surreal Junji Ito atmosphere
@@ -18,491 +18,190 @@ function NoiseOverlay() {
   );
 }
 
-// Fog/Atmospheric depth effect with vignette
-function FogOverlay() {
-  return (
-    <div
-      className="fixed inset-0 pointer-events-none z-30"
-      style={{
-        background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.98) 100%)",
-      }}
-    />
-  );
+// Portfolio section card component
+interface PortfolioCardProps {
+  title: string;
+  description: string;
+  route: string;
+  index: number;
 }
 
-// Subtle ink splatter accent (appears randomly)
-function InkSplatter() {
-  return (
-    <motion.div
-      className="fixed pointer-events-none z-40"
-      style={{
-        top: "10%",
-        right: "8%",
-        width: "120px",
-        height: "120px",
-        opacity: 0.08,
-        filter: "blur(1.5px)",
-      }}
-      animate={{
-        opacity: [0.05, 0.12, 0.05],
-        scale: [1, 1.05, 1],
-      }}
-      transition={{
-        duration: 12,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    >
-      <svg viewBox="0 0 100 100" fill="white">
-        <path d="M50,10 Q30,30 40,50 Q25,60 35,75 Q45,85 55,75 Q70,60 60,50 Q70,30 50,10z" />
-        <circle cx="30" cy="30" r="4" opacity="0.6" />
-        <circle cx="65" cy="45" r="3" opacity="0.5" />
-        <circle cx="45" cy="70" r="2.5" opacity="0.7" />
-      </svg>
-    </motion.div>
-  );
-}
-// Eye component for walls - simplified and clean
-interface WallEyeProps {
-  position: "left" | "right";
-  yPosition: number;
-  zPosition: number;
-  onClick?: (e: React.MouseEvent) => void;
-  label?: string;
-  isPortal?: boolean;
-}
-
-function WallEye({ position, yPosition, zPosition, onClick, label, isPortal }: WallEyeProps) {
-  const [isBlinking, setIsBlinking] = useState(false);
+function PortfolioCard({ title, description, route, index }: PortfolioCardProps) {
+  const router = useRouter();
   const [hovered, setHovered] = useState(false);
-  const eyeRef = useRef<HTMLDivElement>(null);
-  const [pupilPos, setPupilPos] = useState({ x: 0, y: 0 });
-
-  // Track mouse for pupil movement
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!eyeRef.current) return;
-      const rect = eyeRef.current.getBoundingClientRect();
-      const eyeCenterX = rect.left + rect.width / 2;
-      const eyeCenterY = rect.top + rect.height / 2;
-      
-      const deltaX = e.clientX - eyeCenterX;
-      const deltaY = e.clientY - eyeCenterY;
-      const angle = Math.atan2(deltaY, deltaX);
-      const distance = Math.min(Math.sqrt(deltaX * deltaX + deltaY * deltaY) / 150, 1);
-      
-      setPupilPos({
-        x: Math.cos(angle) * distance * 10,
-        y: Math.sin(angle) * distance * 10,
-      });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  // Random blinking
-  useEffect(() => {
-    const blinkInterval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        setIsBlinking(true);
-        setTimeout(() => setIsBlinking(false), 150);
-      }
-    }, 3000 + Math.random() * 2000);
-    return () => clearInterval(blinkInterval);
-  }, []);
-
-  const scale = 1 - (zPosition / 3000);
-  const opacity = Math.max(0.6, 1 - (zPosition / 2500));
 
   return (
     <motion.div
-      ref={eyeRef}
-      className="absolute cursor-pointer"
-      style={{
-        [position]: position === "left" ? "5%" : "5%",
-        top: `${yPosition}%`,
-        transform: `translateZ(${-zPosition}px) scale(${scale})`,
-        opacity: opacity,
-      }}
-      onClick={onClick}
+      className="relative p-8 rounded-lg manga-border bg-black/70 backdrop-blur-sm cursor-pointer group overflow-hidden"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay: 0.2 + index * 0.15 }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      whileHover={{ scale: scale * 1.08 }}
+      onClick={() => router.push(route)}
+      whileHover={{ scale: 1.02, boxShadow: "0 0 40px rgba(255,255,255,0.15)" }}
+      whileTap={{ scale: 0.98 }}
     >
-      {/* Liquid ink-like warp aura on hover */}
+      {/* Background ink splatter on hover */}
       <motion.div
-        aria-hidden
-        className="absolute -inset-6 rounded-full pointer-events-none"
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
         style={{
-          background: "radial-gradient(circle, rgba(255,255,255,0.08), rgba(255,255,255,0) 60%)",
-          mixBlendMode: "overlay",
-          filter: "blur(2px)",
+          background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03), transparent 70%)",
         }}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1.04 : 0.95 }}
-        transition={{ duration: 0.25 }}
       />
-      <motion.div
-        className="relative w-24 h-16 bg-white rounded-full border-3 border-gray-800 overflow-hidden"
-        style={{
-          boxShadow: hovered
-            ? "0 0 35px rgba(255,255,255,0.75), inset 0 2px 10px rgba(0,0,0,0.4)"
-            : "0 0 25px rgba(255,255,255,0.6), inset 0 2px 8px rgba(0,0,0,0.3)",
-        }}
-        animate={{
-          scaleY: isBlinking ? 0.1 : 1,
-          filter: hovered ? "contrast(110%) brightness(105%)" : "none",
-        }}
-        transition={{ duration: 0.1 }}
-      >
-        {/* Iris - Blue */}
-        <motion.div
-          className="absolute left-1/2 top-1/2 w-11 h-11 rounded-full -translate-x-1/2 -translate-y-1/2"
-          style={{
-            background: "radial-gradient(circle at 35% 35%, #4dd0e1 0%, #00acc1 25%, #0277bd 60%, #01579b 100%)",
-            boxShadow: "0 0 12px rgba(77, 208, 225, 0.5), inset 0 -2px 6px rgba(0,0,0,0.4)",
-          }}
-          animate={{
-            x: pupilPos.x,
-            y: pupilPos.y,
-            scale: hovered ? 1.08 : 1,
-          }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+
+      <div className="relative z-10">
+        <motion.h2
+          className="text-3xl sm:text-4xl font-serif scratchy-text mb-4"
+          animate={hovered ? { x: [0, 2, 0] } : {}}
+          transition={{ duration: 0.3 }}
         >
-          {/* Pupil */}
-          <motion.div className="absolute left-1/2 top-1/2 bg-black rounded-full -translate-x-1/2 -translate-y-1/2"
-            style={{
-              width: hovered ? "22px" : "20px",
-              height: hovered ? "22px" : "20px",
-              boxShadow: "0 0 8px rgba(0,0,0,0.8)",
-            }}
-            animate={{ scale: hovered ? 1.05 : 1 }}
-            transition={{ duration: 0.2 }}
-          />
-          
-          {/* Highlight */}
-          <motion.div
-            className="absolute left-[28%] top-[22%] w-2.5 h-2.5 rounded-full bg-white"
-            style={{
-              boxShadow: "0 0 4px rgba(255,255,255,0.8)",
-            }}
-            animate={{
-              opacity: [0.7, 1, 0.7],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-            }}
-          />
-          
-          {/* Secondary highlight */}
-          <div 
-            className="absolute left-[60%] top-[50%] w-1.5 h-1.5 rounded-full bg-white opacity-40"
-          />
+          {title}
+        </motion.h2>
+
+        <p className="text-white/75 leading-relaxed mb-6 text-base">
+          {description}
+        </p>
+
+        <motion.div
+          className="flex items-center text-sm text-white/60 group-hover:text-white/90 transition-colors"
+          animate={hovered ? { x: [0, 4, 0] } : {}}
+          transition={{ duration: 0.5, repeat: Infinity }}
+        >
+          <span>Enter →</span>
         </motion.div>
+      </div>
 
-        {/* Blue veins */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="absolute h-px bg-cyan-900 opacity-20"
-              style={{
-                top: `${35 + i * 12}%`,
-                left: "15%",
-                right: "15%",
-                transform: `rotate(${-8 + i * 8}deg)`,
-                boxShadow: "0 0 2px rgba(0, 172, 193, 0.3)",
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Portal label */}
-        {isPortal && label && (
-          <motion.div
-            className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] text-white/90 scratchy-text"
-            initial={{ opacity: 0, y: 2 }}
-            animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 2 }}
-            transition={{ duration: 0.2 }}
-          >
-            {label}
-          </motion.div>
-        )}
-      </motion.div>
+      {/* Breathing border glow on hover */}
+      <motion.div
+        className="absolute inset-0 rounded-lg pointer-events-none"
+        animate={hovered ? {
+          boxShadow: [
+            "0 0 0px rgba(255,255,255,0)",
+            "0 0 20px rgba(255,255,255,0.2)",
+            "0 0 0px rgba(255,255,255,0)"
+          ]
+        } : {}}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
     </motion.div>
   );
 }
 
-export default function HallOfObservation() {
-  const router = useRouter();
-  const [scroll, setScroll] = useState(0);
+export default function PortfolioHub() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 });
-  const [rippleScale, setRippleScale] = useState(0);
-  const [rippleFreq, setRippleFreq] = useState(0.006);
-  const [rippleEnabled, setRippleEnabled] = useState(true);
-  const [transitioning, setTransitioning] = useState<{active: boolean; x: number; y: number; route: string | null}>({active:false, x:0, y:0, route:null});
 
   // Set window size on mount
   useEffect(() => {
-    setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    
-    const handleResize = () => {
+    if (typeof window !== "undefined") {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-    
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+      
+      const handleResize = () => {
+        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+      };
+      
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
   }, []);
 
-  // Mouse tracking
+  // Mouse tracking for parallax
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
-
-      // Increase ripple intensity as the cursor approaches the floor
-      const ny = e.clientY / window.innerHeight; // 0 (top) -> 1 (bottom)
-      const nearFloor = Math.max(0, Math.min(1, (ny - 0.4) / 0.6));
-      const intensity = nearFloor; // linear mapping for subtle effect
-      setRippleScale(5 + intensity * 20); // 5..25
-      setRippleFreq(0.004 + intensity * 0.008); // 0.004..0.012
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      setScroll((prev) => Math.max(0, Math.min(100, prev + e.deltaY * 0.03)));
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("wheel", handleWheel);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("wheel", handleWheel);
-    };
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
 
   // Parallax based on mouse
-  const parallaxX = useTransform(mouseX, [0, windowSize.width], [-15, 15]);
-  const parallaxY = useTransform(mouseY, [0, windowSize.height], [-8, 8]);
-  const smoothParallaxX = useSpring(parallaxX, { stiffness: 50, damping: 20 });
-  const smoothParallaxY = useSpring(parallaxY, { stiffness: 50, damping: 20 });
+  const parallaxX = useTransform(mouseX, [0, windowSize.width], [-5, 5]);
+  const parallaxY = useTransform(mouseY, [0, windowSize.height], [-3, 3]);
 
-  // Perspective based on scroll
-  const perspective = 1200 + scroll * 10;
-  
-  // Subtle liquid-like warp via background shift
-  const floorBgPosX = useTransform(mouseX, [0, windowSize.width], [-6, 6]);
-  const floorBgPosY = useTransform(mouseY, [0, windowSize.height], [-3, 3]);
-  const floorBgPos = useTransform([floorBgPosX, floorBgPosY], (v: number[]) => `${50 + v[0]}% ${50 + v[1]}%`);
-  const floorBgSize = useTransform(mouseY, [0, windowSize.height], ["100px 100px", "108px 108px"]);
-  
-  // Generate eye positions for infinite corridor effect
-  const generateEyePositions = (side: "left" | "right") => {
-    const eyes = [];
-    for (let z = 0; z < 2500; z += 150) {
-      for (let y = 10; y < 90; y += 20) {
-        eyes.push({ y, z, side });
-      }
-    }
-    return eyes;
-  };
-
-  const leftEyes = generateEyePositions("left");
-  const rightEyes = generateEyePositions("right");
-
-  // Portal eyes definitions
-  const portalEyes = [
-    { side: "left" as const, y: 30, z: 500, route: "/about", label: "About Me" },
-    { side: "right" as const, y: 50, z: 900, route: "/projects", label: "Projects" },
-    { side: "left" as const, y: 70, z: 1300, route: "/inspirations", label: "Inspirations" },
-    { side: "right" as const, y: 40, z: 1700, route: "/upcoming", label: "Upcoming" },
+  const portfolioSections = [
+    {
+      title: "About Me",
+      description: "Dive into my philosophy, approach, and the narrative that shapes my work. Discover the person behind the pixels.",
+      route: "/about",
+    },
+    {
+      title: "Projects",
+      description: "Explore a curated collection of experimental interfaces, data visualizations, and digital experiences that push boundaries.",
+      route: "/projects",
+    },
+    {
+      title: "Inspirations",
+      description: "The artists, designers, concepts, and media that fuel my creative vision. A glimpse into the influences that haunt and inspire.",
+      route: "/inspirations",
+    },
+    {
+      title: "Upcoming",
+      description: "Peek behind the curtain at works in progress and future ambitions. The next chapter is being written.",
+      route: "/upcoming",
+    },
   ];
 
-  const onPortalClick = (e: React.MouseEvent, route: string) => {
-    const x = e.clientX;
-    const y = e.clientY;
-    setTransitioning({ active: true, x, y, route });
-  };
-
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black">
-      {/* Ink-burst transition overlay */}
-      {transitioning.active && (
-        <motion.div
-          className="fixed inset-0 z-[60] pointer-events-none"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-        >
-          <motion.div
-            className="absolute rounded-full"
-            style={{
-              left: transitioning.x - 1,
-              top: transitioning.y - 1,
-              width: 2,
-              height: 2,
-              background: "radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 30%, rgba(0,0,0,1) 100%)",
-              boxShadow: "0 0 60px rgba(255,255,255,0.35)",
-            }}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1600 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            onAnimationComplete={() => {
-              if (transitioning.route) router.push(transitioning.route);
-              setTimeout(() => setTransitioning({ active: false, x: 0, y: 0, route: null }), 50);
-            }}
-          />
-        </motion.div>
-      )}
-
+    <main className="relative min-h-screen overflow-x-hidden bg-black">
       {/* Noise overlay */}
       <NoiseOverlay />
-      {/* Fog/Atmosphere */}
-      <FogOverlay />
 
-      {/* 3D Corridor Container */}
+      {/* Fog vignette */}
       <div
-        className="fixed inset-0"
+        className="fixed inset-0 pointer-events-none z-30"
         style={{
-            perspective: `${perspective}px`,
-          perspectiveOrigin: "center center",
+          background: "radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.95) 100%)",
+        }}
+      />
+
+      {/* Grain animated background */}
+      <div className="fixed inset-0 z-0 manga-grain" />
+
+      {/* Floating ink accent */}
+      <motion.div
+        className="fixed top-20 right-[10%] w-32 h-32 rounded-full pointer-events-none z-10 opacity-[0.08]"
+        style={{
+          background: "radial-gradient(circle, rgba(255,255,255,0.4), transparent 65%)",
+          filter: "blur(30px)",
+        }}
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.06, 0.12, 0.06],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Main content container */}
+      <motion.div
+        className="relative z-20 container mx-auto px-6 py-16 sm:py-24"
+        style={{
+          x: parallaxX,
+          y: parallaxY,
         }}
       >
-        {/* Hallway with parallax */}
-        <motion.div
-            className="absolute inset-0 manga-grain ink-bleed"
-          style={{
-            transformStyle: "preserve-3d",
-            transform: `translateZ(${-scroll * 15}px)`,
-            x: smoothParallaxX,
-            y: smoothParallaxY,
-          }}
+        {/* Header */}
+        <motion.header
+          className="mb-16 sm:mb-20 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
-            {/* SVG filter for floor ripple (displacement map) */}
-            <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
-              <defs>
-                <filter id="floorRipple" x="-20%" y="-20%" width="140%" height="140%">
-                  <feTurbulence
-                    type="fractalNoise"
-                    baseFrequency={rippleFreq}
-                    numOctaves="2"
-                    seed="2"
-                    result="noise"
-                  />
-                  <feDisplacementMap
-                    in="SourceGraphic"
-                    in2="noise"
-                    scale={rippleScale}
-                    xChannelSelector="R"
-                    yChannelSelector="G"
-                  />
-                </filter>
-              </defs>
-            </svg>
-
-            {/* Checkerboard Floor with liquid ripple */}
-            <motion.div
-            className="absolute bottom-0 w-full h-[70%] manga-grain"
-              style={{
-                transform: "rotateX(80deg)",
-                transformOrigin: "center bottom",
-                backgroundImage: `repeating-conic-gradient(#000 0% 25%, #fff 0% 50%)`,
-                backgroundPosition: rippleEnabled ? floorBgPos : "50% 50%",
-                backgroundSize: rippleEnabled ? floorBgSize : "100px 100px",
-                boxShadow: "inset 0 -100px 150px rgba(0,0,0,0.9)",
-                willChange: "filter, background-position, background-size, transform",
-                filter: rippleEnabled ? "url(#floorRipple)" : "none",
-              }}
-            />
-
-          {/* Left Wall with Eyes */}
-          <div
-          className="absolute left-0 top-0 bottom-0 w-[220px] bg-gradient-to-r from-black via-gray-900 to-transparent manga-border breathe"
-            style={{
-              transform: "rotateY(18deg)",
-              transformOrigin: "left center",
-              transformStyle: "preserve-3d",
-              boxShadow: "inset -30px 0 60px rgba(0,0,0,0.9)",
-            }}
-          >
-            {leftEyes.map((eye, i) => (
-              <WallEye
-                key={`left-${i}`}
-                position="left"
-                yPosition={eye.y}
-                zPosition={eye.z}
-              />
-            ))}
-
-            {/* Portal eyes on the left */}
-            {portalEyes.filter(p => p.side === "left").map((p, i) => (
-              <WallEye
-                key={`pl-${i}-${p.y}-${p.z}`}
-                position="left"
-                yPosition={p.y}
-                zPosition={p.z}
-                isPortal
-                label={p.label}
-                onClick={(e) => onPortalClick(e as any, p.route)}
-              />
-            ))}
-          </div>
-
-          {/* Right Wall with Eyes */}
-          <div
-          className="absolute right-0 top-0 bottom-0 w-[220px] bg-gradient-to-l from-black via-gray-900 to-transparent manga-border breathe"
-            style={{
-              transform: "rotateY(-18deg)",
-              transformOrigin: "right center",
-              transformStyle: "preserve-3d",
-              boxShadow: "inset 30px 0 60px rgba(0,0,0,0.9)",
-            }}
-          >
-            {rightEyes.map((eye, i) => (
-              <WallEye
-                key={`right-${i}`}
-                position="right"
-                yPosition={eye.y}
-                zPosition={eye.z}
-              />
-            ))}
-
-            {/* Portal eyes on the right */}
-            {portalEyes.filter(p => p.side === "right").map((p, i) => (
-              <WallEye
-                key={`pr-${i}-${p.y}-${p.z}`}
-                position="right"
-                yPosition={p.y}
-                zPosition={p.z}
-                isPortal
-                label={p.label}
-                onClick={(e) => onPortalClick(e as any, p.route)}
-              />
-            ))}
-          </div>
-
-          {/* Subtle ceiling plane to reinforce corridor */}
-          <div
-            className="absolute left-0 right-0 top-0 h-[22%] manga-grain"
-            style={{
-              transform: "rotateX(-78deg)",
-              transformOrigin: "center top",
-              background: "linear-gradient(180deg, #000 0%, #0b0b0b 60%, transparent 100%)",
-              boxShadow: "inset 0 80px 120px rgba(0,0,0,0.9)",
-              opacity: 0.9,
-            }}
-          />
-
-          {/* Female Silhouette at the end */}
-          <motion.div
-            className="absolute left-1/2 bottom-[15%] breathe"
-            style={{
-              transform: `translate3d(-50%, 0, -2800px) scale(${1.2 + scroll * 0.015})`,
-            }}
+          <motion.h1
+            className="text-5xl sm:text-7xl font-serif mb-6 scratchy-text"
             animate={{
-              opacity: [0.6, 0.75, 0.6],
+              textShadow: [
+                "0 0 20px rgba(255,255,255,0.3)",
+                "0 0 30px rgba(255,255,255,0.5)",
+                "0 0 20px rgba(255,255,255,0.3)",
+              ],
             }}
             transition={{
               duration: 4,
@@ -510,138 +209,71 @@ export default function HallOfObservation() {
               ease: "easeInOut",
             }}
           >
-            {/* Female figure silhouette */}
-            <div
-              className="relative"
-              style={{
-                width: "60px",
-                height: "180px",
-                background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.8) 15%, #000 40%)",
-                clipPath: "polygon(40% 0, 60% 0, 55% 15%, 70% 25%, 72% 100%, 28% 100%, 30% 25%, 45% 15%)",
-                filter: "blur(1px)",
-                boxShadow: "0 0 30px rgba(255,255,255,0.2)",
-              }}
-            >
-              {/* Head */}
-              <div
-                className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-black"
-                style={{
-                  boxShadow: "0 0 15px rgba(255,255,255,0.15)",
-                }}
-              />
-            </div>
-          </motion.div>
-
-          {/* Vanishing point light */}
-          <motion.div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{
-              transform: `translate3d(-50%, -50%, -3000px)`,
-            }}
-            animate={{
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-            }}
+            Portfolio
+          </motion.h1>
+          
+          <motion.p
+            className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
           >
-            <div
-              className="w-32 h-32 rounded-full"
-              style={{
-                background: "radial-gradient(circle, rgba(255,255,255,0.3), transparent)",
-                filter: "blur(30px)",
-              }}
+            Navigate through the corridors of creativity. Each section reveals a different facet of the work and mind behind it.
+          </motion.p>
+        </motion.header>
+
+        {/* Portfolio grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto mb-16">
+          {portfolioSections.map((section, index) => (
+            <PortfolioCard
+              key={section.route}
+              title={section.title}
+              description={section.description}
+              route={section.route}
+              index={index}
             />
-          </motion.div>
-
-          {/* Dynamic fog intensifying with scroll */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,1) 100%)",
-            }}
-            animate={{ opacity: 0.2 + Math.min(scroll / 100, 0.6) }}
-          />
-
-          {/* Floating prism shards */}
-          <PrismShards scroll={scroll} />
-        </motion.div>
-      </div>
-
-      {/* Instructions */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 text-center font-mono">
-        <div className="inline-flex flex-col items-center gap-1 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
-          <p className="text-white text-sm drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] scratchy-text">Scroll to walk deeper • Move mouse to look around</p>
-          <p className="text-white/70 text-[11px] scratchy-text">Hall of Observation</p>
+          ))}
         </div>
-      </div>
 
-      {/* Ripple toggle */}
-      <div className="fixed bottom-8 right-6 z-20">
-        <button
-          aria-pressed={rippleEnabled}
-          onClick={() => setRippleEnabled((v) => !v)}
-          className="px-3 py-2 rounded-lg border border-white/20 bg-black/60 text-white text-xs hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30"
-          title="Toggle floor ripple"
-        >
-          Ripple: {rippleEnabled ? "On" : "Off"}
-        </button>
-      </div>
-    </main>
-  );
-}
-
-// Floating prism shards component
-function PrismShards({ scroll }: { scroll: number }) {
-  const items = [
-    { x: "20%", y: "30%", z: -800, size: 40, delay: 0 },
-    { x: "75%", y: "20%", z: -1200, size: 28, delay: 1.2 },
-    { x: "60%", y: "65%", z: -1500, size: 34, delay: 0.6 },
-  ];
-  return (
-    <>
-      {items.map((it, idx) => (
+        {/* Back to home link */}
         <motion.div
-          key={idx}
-          className="absolute"
-          style={{
-            left: it.x,
-            top: it.y,
-            transform: `translateZ(${it.z - scroll * 10}px)`,
-          }}
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1 }}
         >
-          <motion.div
-            className="relative"
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 10 + idx * 2, repeat: Infinity, ease: "easeInOut", delay: it.delay }}
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm scratchy-text"
           >
-            <div
-              className="opacity-80"
-              style={{
-                width: `${it.size}px`,
-                height: `${it.size * 1.4}px`,
-                clipPath: "polygon(50% 0%, 80% 30%, 60% 100%, 40% 100%, 20% 30%)",
-                background: "linear-gradient(180deg, #eee, #111)",
-                boxShadow: "0 0 20px rgba(255,255,255,0.15)",
-                filter: "contrast(120%)",
-              }}
-            />
-            {/* Minimal chromatic flicker */}
-            <motion.div
-              className="absolute inset-0 mix-blend-screen"
-              animate={{ opacity: [0.05, 0.12, 0.05] }}
-              transition={{ duration: 6 + idx, repeat: Infinity, ease: "easeInOut", delay: it.delay / 2 }}
-              style={{
-                background: "linear-gradient(180deg, rgba(173,216,230,0.15), rgba(255,182,193,0.12))",
-                clipPath: "polygon(50% 0%, 80% 30%, 60% 100%, 40% 100%, 20% 30%)",
-                filter: "blur(0.5px)",
-              }}
-            />
-          </motion.div>
+            ← Return to Portal
+          </a>
         </motion.div>
-      ))}
-    </>
+      </motion.div>
+
+      {/* Floating decorative element */}
+      <motion.div
+        className="fixed bottom-[15%] left-[8%] pointer-events-none z-10"
+        animate={{
+          y: [0, -8, 0],
+          rotate: [0, 2, 0],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      >
+        <div
+          className="w-12 h-16 opacity-20"
+          style={{
+            clipPath: "polygon(50% 0%, 80% 30%, 60% 100%, 40% 100%, 20% 30%)",
+            background: "linear-gradient(180deg, #eee, #111)",
+            boxShadow: "0 0 15px rgba(255,255,255,0.1)",
+          }}
+        />
+      </motion.div>
+    </main>
   );
 }
 
