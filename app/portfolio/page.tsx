@@ -201,44 +201,107 @@ export default function PortfolioHub() {
           </motion.p>
         </motion.header>
 
-        {/* Coming Soon Placeholder */}
+        {/* Coming Soon Placeholder (enhanced technical aesthetic) */}
         <motion.div
           className="mx-auto mb-20 max-w-3xl text-center p-10 rounded-lg manga-border bg-black/70 backdrop-blur-sm relative overflow-hidden"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9 }}
         >
+          {/* Animated ambient gradient pulse */}
           <motion.div
-            className="absolute inset-0 opacity-0"
-            animate={{
-              opacity: [0, 0.12, 0],
-            }}
-            transition={{ duration: 6, repeat: Infinity }}
+            className="absolute inset-0 opacity-30"
             style={{
-              background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05), transparent 70%)",
+              background: "radial-gradient(circle at 30% 40%, rgba(255,255,255,0.05), transparent 70%)",
+              mixBlendMode: "screen"
             }}
+            animate={{ opacity: [0.15, 0.35, 0.15] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           />
+          {/* Scan-line overlay */}
+          <motion.div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none"
+            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)" , backgroundSize: "100% 3px"}}
+            animate={{ opacity: [0.08, 0.14, 0.08] }}
+            transition={{ duration: 5, repeat: Infinity }}
+          />
+          {/* Corner circuit accents */}
+          <div className="absolute -top-px left-0 h-16 w-16 opacity-40">
+            <svg viewBox="0 0 64 64" className="w-full h-full" stroke="white" strokeWidth="1" fill="none">
+              <path d="M2 2h40v20h20v40H42V42H22V22H2z" vectorEffect="non-scaling-stroke" />
+              <circle cx="22" cy="22" r="3" />
+              <circle cx="42" cy="42" r="3" />
+            </svg>
+          </div>
+          <div className="absolute bottom-0 right-0 h-16 w-16 opacity-30 rotate-180">
+            <svg viewBox="0 0 64 64" className="w-full h-full" stroke="white" strokeWidth="1" fill="none">
+              <path d="M2 2h40v20h20v40H42V42H22V22H2z" vectorEffect="non-scaling-stroke" />
+              <circle cx="22" cy="22" r="3" />
+              <circle cx="42" cy="42" r="3" />
+            </svg>
+          </div>
           <motion.h2
-            className="text-4xl sm:text-5xl font-serif scratchy-text mb-6"
-            animate={{ scale: [1, 1.015, 1] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="text-4xl sm:text-5xl font-serif scratchy-text mb-6 relative"
+            animate={{ scale: [1, 1.012, 1] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
           >
             Coming Soon
           </motion.h2>
           <motion.p
             className="text-white/70 leading-relaxed text-lg max-w-xl mx-auto"
-            animate={{ opacity: [0.8, 1, 0.8] }}
-            transition={{ duration: 7, repeat: Infinity }}
+            animate={{ opacity: [0.85, 1, 0.85] }}
+            transition={{ duration: 6, repeat: Infinity }}
           >
-            The interactive portfolio hub is incubating in the void. Soon you'll traverse projects, inspirations, and unfolding works. For now, the corridor echoes with possibility.
+            The interactive hub is being assembled. Soon: modular project index, influence matrix, and evolving roadmap. Meanwhile—this chamber calibrates.
           </motion.p>
+          {/* Meta status rows */}
+          <div className="mt-8 space-y-2 font-mono text-xs tracking-wide">
+            <motion.div animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 5, repeat: Infinity }}>STATUS: SYNTHESIZING MODULES…</motion.div>
+            <motion.div animate={{ opacity: [0.5, 0.9, 0.5] }} transition={{ duration: 7, repeat: Infinity }}>QUEUE: [ PROJECTS | INSPIRATIONS | UPCOMING ]</motion.div>
+            <motion.div animate={{ opacity: [0.4, 0.8, 0.4] }} transition={{ duration: 9, repeat: Infinity }}>CHANNEL: LIMINAL_RENDER_PIPE</motion.div>
+          </div>
+          {/* Progress bar */}
           <motion.div
-            className="mt-8 inline-flex items-center gap-2 text-sm text-white/60"
-            animate={{ x: [0, 3, 0] }}
-            transition={{ duration: 4, repeat: Infinity }}
+            className="mt-6 w-64 h-2 mx-auto rounded-full bg-white/10 overflow-hidden"
           >
-            <span>Materializing assets…</span>
-            <span className="text-[10px] tracking-widest">██░░░░░</span>
+            <motion.div
+              className="h-full bg-gradient-to-r from-white via-white/80 to-white/40"
+              animate={{ x: ["-100%", "100%"] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
+              style={{ width: "50%" }}
+            />
+          </motion.div>
+          {/* Contact CTA */}
+          <motion.div className="mt-10">
+            <motion.a
+              href="mailto:lazzaradani@gmail.com"
+              aria-label="Contact Danielle via Email"
+              className="relative inline-flex items-center justify-center px-8 py-4 rounded-full font-mono text-sm tracking-wider overflow-hidden focus:outline-none focus:ring-2 focus:ring-white/40 group"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {/* Pulsing outer aura */}
+              <motion.div
+                className="absolute -inset-2 rounded-full"
+                animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.08, 1] }}
+                transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
+                style={{
+                  background: "radial-gradient(circle, rgba(255,255,255,0.35), transparent 70%)",
+                  filter: "blur(18px)",
+                }}
+              />
+              {/* Glowing border */}
+              <motion.span
+                className="absolute inset-0 rounded-full border border-white/30"
+                animate={{ boxShadow: ["0 0 0px rgba(255,255,255,0.2)", "0 0 18px rgba(255,255,255,0.55)", "0 0 0px rgba(255,255,255,0.2)"] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <span className="relative z-10 text-white">CONTACT • LAZZARADANI@GMAIL.COM</span>
+            </motion.a>
           </motion.div>
         </motion.div>
 
