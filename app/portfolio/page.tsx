@@ -303,7 +303,7 @@ export default function PortfolioHub() {
             Coming Soon
           </motion.h2>
           <motion.p
-            className="text-white/70 leading-relaxed text-lg max-w-xl mx-auto"
+            className="text-white/70 leading-relaxed text-lg max-w-xl mx-auto text-center"
             animate={{ opacity: [0.85, 1, 0.85] }}
             transition={{ duration: 6, repeat: Infinity }}
           >
