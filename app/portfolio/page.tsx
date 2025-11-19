@@ -122,28 +122,7 @@ export default function PortfolioHub() {
   const parallaxX = useTransform(mouseX, [0, windowSize.width], [-5, 5]);
   const parallaxY = useTransform(mouseY, [0, windowSize.height], [-3, 3]);
 
-  const portfolioSections = [
-    {
-      title: "About Me",
-      description: "Dive into my philosophy, approach, and the narrative that shapes my work. Discover the person behind the pixels.",
-      route: "/about",
-    },
-    {
-      title: "Projects",
-      description: "Explore a curated collection of experimental interfaces, data visualizations, and digital experiences that push boundaries.",
-      route: "/projects",
-    },
-    {
-      title: "Inspirations",
-      description: "The artists, designers, concepts, and media that fuel my creative vision. A glimpse into the influences that haunt and inspire.",
-      route: "/inspirations",
-    },
-    {
-      title: "Upcoming",
-      description: "Peek behind the curtain at works in progress and future ambitions. The next chapter is being written.",
-      route: "/upcoming",
-    },
-  ];
+  // Placeholder mode: Coming Soon message instead of interactive sections
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-black">
@@ -222,18 +201,46 @@ export default function PortfolioHub() {
           </motion.p>
         </motion.header>
 
-        {/* Portfolio grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto mb-16">
-          {portfolioSections.map((section, index) => (
-            <PortfolioCard
-              key={section.route}
-              title={section.title}
-              description={section.description}
-              route={section.route}
-              index={index}
-            />
-          ))}
-        </div>
+        {/* Coming Soon Placeholder */}
+        <motion.div
+          className="mx-auto mb-20 max-w-3xl text-center p-10 rounded-lg manga-border bg-black/70 backdrop-blur-sm relative overflow-hidden"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9 }}
+        >
+          <motion.div
+            className="absolute inset-0 opacity-0"
+            animate={{
+              opacity: [0, 0.12, 0],
+            }}
+            transition={{ duration: 6, repeat: Infinity }}
+            style={{
+              background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05), transparent 70%)",
+            }}
+          />
+          <motion.h2
+            className="text-4xl sm:text-5xl font-serif scratchy-text mb-6"
+            animate={{ scale: [1, 1.015, 1] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            Coming Soon
+          </motion.h2>
+          <motion.p
+            className="text-white/70 leading-relaxed text-lg max-w-xl mx-auto"
+            animate={{ opacity: [0.8, 1, 0.8] }}
+            transition={{ duration: 7, repeat: Infinity }}
+          >
+            The interactive portfolio hub is incubating in the void. Soon you'll traverse projects, inspirations, and unfolding works. For now, the corridor echoes with possibility.
+          </motion.p>
+          <motion.div
+            className="mt-8 inline-flex items-center gap-2 text-sm text-white/60"
+            animate={{ x: [0, 3, 0] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          >
+            <span>Materializing assets…</span>
+            <span className="text-[10px] tracking-widest">██░░░░░</span>
+          </motion.div>
+        </motion.div>
 
         {/* Back to home link */}
         <motion.div
